@@ -8,3 +8,4 @@ build/
 .DS_Store
 chroma_db/
 *.log
+.venv/
