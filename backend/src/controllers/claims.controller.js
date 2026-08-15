@@ -65,3 +65,18 @@ async function getClaim(req, res) {
 }
 
 module.exports = { submitClaim, listClaims, getClaim };
+
+async function getClaimStatus(req, res) {
+  try {
+    const claim = await getClaimById(req.params.id, req.userId);
+    if (!claim) {
+      return res.status(404).json({ error: 'Claim not found' });
+    }
+    res.json({ claim_id: claim.claim_id, verification_status: claim.verification_status });
+  } catch (err) {
+    console.error('Get claim status error:', err);
+    res.status(500).json({ error: 'Something went wrong fetching claim status' });
+  }
+}
+
+module.exports.getClaimStatus = getClaimStatus;
