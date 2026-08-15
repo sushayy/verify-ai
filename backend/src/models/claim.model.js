@@ -30,3 +30,13 @@ async function getClaimById(claimId, userId) {
 }
 
 module.exports = { createClaim, getClaimsByUser, getClaimById };
+
+async function updateClaimStatus(claimId, status) {
+  const result = await pool.query(
+    `UPDATE claims SET verification_status = $1 WHERE claim_id = $2 RETURNING *`,
+    [status, claimId]
+  );
+  return result.rows[0];
+}
+
+module.exports.updateClaimStatus = updateClaimStatus;

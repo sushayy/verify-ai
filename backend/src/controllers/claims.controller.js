@@ -1,4 +1,6 @@
-const { createClaim, getClaimsByUser, getClaimById } = require('../models/claim.model');
+const { createClaim, getClaimsByUser, getClaimById, updateClaimStatus } = require('../models/claim.model');
+const { createReport, createEvidence, getReportByClaimId, getEvidenceByClaimId } = require('../models/report.model');
+const { verifyClaim } = require('../services/aiService');
 
 async function submitClaim(req, res) {
   try {
@@ -11,10 +13,27 @@ async function submitClaim(req, res) {
     const claim = await createClaim(req.userId, claim_text.trim());
     res.status(201).json({ claim });
 
-    // NOTE: AI verification pipeline call goes here in Phase 10.
+    // Run verification asynchronously — don't block the response
+    runVerification(claim.claim_id, claim.claim_text);
   } catch (err) {
     console.error('Submit claim error:', err);
     res.status(500).json({ error: 'Something went wrong submitting the claim' });
+  }
+}
+
+async function runVerification(claimId, claimText) {
+  try {
+    await updateClaimStatus(claimId, 'processing');
+
+    const aiResult = await verifyClaim(claimText);
+
+    await createReport(claimId, aiResult.final_result, aiResult.confidence_score, aiResult.explanation);
+    await createEvidence(claimId, aiResult.evidence);
+
+    await updateClaimStatus(claimId, 'completed');
+  } catch (err) {
+    console.error(`Verification failed for claim ${claimId}:`, err);
+    await updateClaimStatus(claimId, 'failed');
   }
 }
 
@@ -34,7 +53,11 @@ async function getClaim(req, res) {
     if (!claim) {
       return res.status(404).json({ error: 'Claim not found' });
     }
-    res.json({ claim });
+
+    const report = await getReportByClaimId(claim.claim_id);
+    const evidence = await getEvidenceByClaimId(claim.claim_id);
+
+    res.json({ claim, report: report || null, evidence });
   } catch (err) {
     console.error('Get claim error:', err);
     res.status(500).json({ error: 'Something went wrong fetching the claim' });
