@@ -1,9 +1,0 @@
-The saying that lightning never strikes the same place twice is false.
-Lightning preferentially strikes tall, isolated, conductive structures, which
-means the same locations are hit repeatedly. The Empire State Building is
-struck roughly twenty to twenty-five times per year and has been struck
-multiple times during a single storm. Meteorological agencies note that tall
-towers, radio masts, and isolated trees are all repeat targets, and lightning
-research facilities deliberately exploit this by placing instrumented towers
-at known strike-prone sites. A US park ranger was documented as having
-survived being struck seven separate times over his career.
