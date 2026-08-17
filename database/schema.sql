@@ -12,6 +12,7 @@ CREATE TABLE claims (
     claim_text          TEXT NOT NULL,
     submission_date     TIMESTAMP DEFAULT NOW(),
     verification_status VARCHAR(20) DEFAULT 'pending'
+    CHECK (verification_status IN ('pending', 'processing', 'completed', 'failed'))
 );
 
 CREATE TABLE evidence (
@@ -20,15 +21,19 @@ CREATE TABLE evidence (
     source_name       VARCHAR(255),
     url               TEXT,
     extracted_text    TEXT,
-    stance            VARCHAR(20),
+    stance VARCHAR(20)
+    CHECK (stance IN ('supporting', 'contradicting', 'neutral')),
     reliability_score DECIMAL(4,2)
+    CHECK (reliability_score >= 0.0 AND reliability_score <= 1.0)
 );
 
 CREATE TABLE reports (
     report_id        SERIAL PRIMARY KEY,
     claim_id         INTEGER REFERENCES claims(claim_id) ON DELETE CASCADE UNIQUE,
-    final_result     VARCHAR(20),
-    confidence_score DECIMAL(4,2),
+    final_result VARCHAR(20)
+    CHECK (final_result IN ('TRUE', 'FALSE', 'MISLEADING', 'UNVERIFIED')),
+    confidence_score DECIMAL(4,2)
+    CHECK (confidence_score >= 0.0 AND confidence_score <= 1.0),
     explanation      TEXT,
     created_at       TIMESTAMP DEFAULT NOW()
 );
