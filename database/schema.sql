@@ -40,3 +40,8 @@ CREATE TABLE reports (
 
 CREATE INDEX idx_claims_user ON claims(user_id);
 CREATE INDEX idx_evidence_claim ON evidence(claim_id);
+
+-- Phase 16: PDF/URL upload support
+ALTER TABLE claims ADD COLUMN input_type VARCHAR(20) DEFAULT 'text' CHECK (input_type IN ('text', 'url', 'document'));
+ALTER TABLE claims ADD COLUMN source_url TEXT;
+ALTER TABLE claims ADD COLUMN source_filename TEXT;

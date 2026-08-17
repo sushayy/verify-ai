@@ -80,3 +80,68 @@ async function getClaimStatus(req, res) {
 }
 
 module.exports.getClaimStatus = getClaimStatus;
+
+const { PDFParse } = require('pdf-parse');
+const cheerio = require('cheerio');
+
+async function extractTextFromPdf(buffer) {
+  const parser = new PDFParse({ data: buffer });
+  try {
+    const result = await parser.getText();
+    return result.text.trim();
+  } finally {
+    await parser.destroy();
+  }
+}
+
+async function extractTextFromUrl(url) {
+  const response = await fetch(url);
+  if (!response.ok) {
+    throw new Error(`Failed to fetch URL: ${response.status}`);
+  }
+  const html = await response.text();
+  const $ = cheerio.load(html);
+  $('script, style, nav, footer, header').remove();
+  const text = $('body').text().replace(/\s+/g, ' ').trim();
+  return text;
+}
+
+async function uploadClaim(req, res) {
+  try {
+    let claimText, inputType, sourceUrl, sourceFilename;
+
+    if (req.file) {
+      // PDF upload
+      claimText = await extractTextFromPdf(req.file.buffer);
+      inputType = 'document';
+      sourceFilename = req.file.originalname;
+    } else if (req.body.url) {
+      // URL input
+      claimText = await extractTextFromUrl(req.body.url);
+      inputType = 'url';
+      sourceUrl = req.body.url;
+    } else {
+      return res.status(400).json({ error: 'Provide either a PDF file or a url' });
+    }
+
+    if (!claimText || claimText.trim().length === 0) {
+      return res.status(400).json({ error: 'Could not extract any text from the provided source' });
+    }
+
+    // Cap extremely long extracted text to keep the pipeline responsive
+    const MAX_LENGTH = 5000;
+    if (claimText.length > MAX_LENGTH) {
+      claimText = claimText.slice(0, MAX_LENGTH);
+    }
+
+    const claim = await createClaim(req.userId, claimText, inputType, sourceUrl, sourceFilename);
+    res.status(201).json({ claim });
+
+    runVerification(claim.claim_id, claim.claim_text);
+  } catch (err) {
+    console.error('Upload claim error:', err);
+    res.status(500).json({ error: 'Something went wrong processing the uploaded source' });
+  }
+}
+
+module.exports.uploadClaim = uploadClaim;
