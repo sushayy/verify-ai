@@ -7,3 +7,18 @@ export async function submitClaim(claimText) {
 
   return response.data.claim;
 }
+
+export async function getClaimStatus(claimId) {
+  const response = await client.get(`/claims/${claimId}/status`);
+  return response.data;
+}
+
+export async function getClaimById(claimId) {
+  const response = await client.get(`/claims/${claimId}`);
+  return response.data;
+}
+
+export async function getClaims() {
+  const response = await client.get("/claims");
+  return response.data.claims || [];
+}

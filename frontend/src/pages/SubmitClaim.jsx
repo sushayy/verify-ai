@@ -110,4 +110,4 @@ function SubmitClaim() {
   );
 }
 
-export default SubmitClaim;
+export default SubmitClaim;   
