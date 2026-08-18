@@ -22,3 +22,16 @@ export async function getClaims() {
   const response = await client.get("/claims");
   return response.data.claims || [];
 }
+export async function uploadUrlClaim(url) {
+  const response = await client.post("/claims/upload", { url });
+  return response.data.claim;
+}
+
+export async function uploadPdfClaim(file) {
+  const formData = new FormData();
+  formData.append("file", file);
+  const response = await client.post("/claims/upload", formData, {
+    headers: { "Content-Type": "multipart/form-data" },
+  });
+  return response.data.claim;
+}
