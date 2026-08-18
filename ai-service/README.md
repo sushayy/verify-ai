@@ -104,7 +104,7 @@ python scripts/ingest_corpus.py
 Ingest prunes chunks for documents that no longer exist, so editing and
 deleting both work.
 
-Retrieval drops hits beyond `MAX_DISTANCE` (1.2) in `services/vector_store.py`.
+Retrieval drops hits beyond `MAX_DISTANCE` (0.6, recalibrated for Gemini embeddings) in `services/vector_store.py`.
 Without that cutoff the search always returns its full `k`, padding evidence
 with unrelated documents; with it, a claim the corpus knows nothing about
 correctly returns no evidence and comes back `UNVERIFIED`.
