@@ -16,12 +16,12 @@ IMPORTANT:
 - The response MUST be valid JSON that can be parsed directly.
 
 The JSON object MUST contain exactly these fields:
-{
+{{
   "normalized_statement": "one clear standalone factual statement",
   "entities": [],
   "dates": [],
   "claim_type": "general_fact"
-}
+}}
 
 Field requirements:
 - "normalized_statement": the claim rewritten as one clear, standalone factual statement
