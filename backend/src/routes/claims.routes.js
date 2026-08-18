@@ -2,6 +2,7 @@ const express = require('express');
 const multer = require('multer');
 const router = express.Router();
 const requireAuth = require('../middleware/auth.middleware');
+const { claimSubmissionLimiter } = require('../middleware/rateLimit.middleware');
 const { submitClaim, listClaims, getClaim, getClaimStatus, uploadClaim } = require('../controllers/claims.controller');
 
 const upload = multer({
@@ -17,8 +18,8 @@ const upload = multer({
 
 router.use(requireAuth);
 
-router.post('/', submitClaim);
-router.post('/upload', upload.single('file'), uploadClaim);
+router.post('/', claimSubmissionLimiter, submitClaim);
+router.post('/upload', claimSubmissionLimiter, upload.single('file'), uploadClaim);
 router.get('/', listClaims);
 router.get('/:id/status', getClaimStatus);
 router.get('/:id', getClaim);
